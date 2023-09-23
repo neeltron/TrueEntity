@@ -28,7 +28,7 @@ class MyHomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Empty Classy Page'),
+        title: const Text('TrueEntity'),
       ),
       body: Center(
         child: ElevatedButton(
@@ -107,7 +107,7 @@ class _NextPageState extends State<NextPage> {
 
                 String jsonData = jsonEncode(dataToSend);
 
-                const String serverUrl = 'https://trueentityapi.neeltron.repl.co';
+                const String serverUrl = 'https://trueentity-api.neeltron.repl.co';
 
                 try {
                   final response = await http.post(
@@ -131,6 +131,103 @@ class _NextPageState extends State<NextPage> {
             ),
           ],
         ),
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        items: const <BottomNavigationBarItem>[
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: 'Home',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.car_crash),
+            label: 'Fetch Data',
+          ),
+        ],
+        currentIndex: 0,
+        onTap: (int index) {
+          if (index == 1) {
+            Navigator.of(context).push(MaterialPageRoute(
+              builder: (context) => const DataFetchingPage(),
+            ));
+          }
+        },
+      ),
+    );
+  }
+}
+
+class DataFetchingPage extends StatefulWidget {
+  const DataFetchingPage();
+
+  @override
+  _DataFetchingPageState createState() => _DataFetchingPageState();
+}
+
+class _DataFetchingPageState extends State<DataFetchingPage> {
+  String fetchedData = '';
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Masked Identity'),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            ElevatedButton(
+              onPressed: () async {
+                try {
+                  final String serverUrl = 'https://trueentity-api.neeltron.repl.co';
+
+                  final response = await http.get(
+                    Uri.parse('$serverUrl/fetch-data'),
+                  );
+
+                  if (response.statusCode == 200) {
+                    setState(() {
+                      fetchedData = response.body;
+                    });
+                  } else {
+                    print('Request failed with status: ${response.statusCode}');
+                  }
+                } catch (error) {
+                  print('Error fetching data: $error');
+                }
+              },
+              child: const Text('You can use the following masked identity:'),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Fetched Data:',
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            Text(
+              fetchedData,
+              style: const TextStyle(fontSize: 18),
+            ),
+          ],
+        ),
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        items: const <BottomNavigationBarItem>[
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: 'Home',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.car_crash),
+            label: 'Fetch Data',
+          ),
+        ],
+        currentIndex: 1,
+        onTap: (int index) {
+          if (index == 0) {
+            Navigator.of(context).pop();
+          }
+        },
       ),
     );
   }
