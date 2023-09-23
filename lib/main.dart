@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 void main() {
   runApp(const MyApp());
@@ -10,7 +12,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'TrueEntity',
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
@@ -31,13 +33,12 @@ class MyHomePage extends StatelessWidget {
       body: Center(
         child: ElevatedButton(
           onPressed: () {
-            // Navigate to the next page when the button is pressed
             Navigator.of(context).push(MaterialPageRoute(
               builder: (context) => const NextPage(),
             ));
           },
           child: const Text(
-            'Go to Next Page',
+            'Login with World ID',
             style: TextStyle(fontSize: 18),
           ),
         ),
@@ -91,12 +92,40 @@ class _NextPageState extends State<NextPage> {
             ),
             const SizedBox(height: 16),
             ElevatedButton(
-              onPressed: () {
+              onPressed: () async {
                 final name = nameController.text;
                 final ssn = ssnController.text;
                 final passport = passportController.text;
                 final dob = dobController.text;
 
+                Map<String, dynamic> dataToSend = {
+                  'name': name,
+                  'ssn': ssn,
+                  'passport': passport,
+                  'dob': dob,
+                };
+
+                String jsonData = jsonEncode(dataToSend);
+
+                const String serverUrl = 'https://trueentityapi.neeltron.repl.co';
+
+                try {
+                  final response = await http.post(
+                    Uri.parse('$serverUrl/input'),
+                    headers: <String, String>{
+                      'Content-Type': 'application/json; charset=UTF-8',
+                    },
+                    body: jsonData,
+                  );
+
+                  if (response.statusCode == 200) {
+                    print('Response from server: ${response.body}');
+                  } else {
+                    print('Request failed with status: ${response.statusCode}');
+                  }
+                } catch (error) {
+                  print('Error sending request: $error');
+                }
               },
               child: const Text('Submit'),
             ),
