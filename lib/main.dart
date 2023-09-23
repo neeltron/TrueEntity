@@ -54,6 +54,8 @@ class NextPage extends StatefulWidget {
   _NextPageState createState() => _NextPageState();
 }
 
+var name = "x";
+
 class _NextPageState extends State<NextPage> {
   TextEditingController nameController = TextEditingController();
   TextEditingController ssnController = TextEditingController();
@@ -93,7 +95,7 @@ class _NextPageState extends State<NextPage> {
             const SizedBox(height: 16),
             ElevatedButton(
               onPressed: () async {
-                final name = nameController.text;
+                name = nameController.text;
                 final ssn = ssnController.text;
                 final passport = passportController.text;
                 final dob = dobController.text;
@@ -183,7 +185,7 @@ class _DataFetchingPageState extends State<DataFetchingPage> {
                   final String serverUrl = 'https://trueentity-api.neeltron.repl.co';
 
                   final response = await http.get(
-                    Uri.parse('$serverUrl/fetch-data'),
+                    Uri.parse('$serverUrl/data?name=$name'),
                   );
 
                   if (response.statusCode == 200) {
@@ -200,9 +202,9 @@ class _DataFetchingPageState extends State<DataFetchingPage> {
               child: const Text('You can use the following masked identity:'),
             ),
             const SizedBox(height: 16),
-            Text(
+            const Text(
               'Fetched Data:',
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             Text(
               fetchedData,
