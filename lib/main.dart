@@ -179,6 +179,12 @@ class _DataFetchingPageState extends State<DataFetchingPage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            Image.network(
+              'https://trueentity-api.neeltron.repl.co/static/qrcode.png',
+              width: 100, // Set the desired width
+              height: 100, // Set the desired height
+            ),
+            const SizedBox(height: 16),
             ElevatedButton(
               onPressed: () async {
                 try {
