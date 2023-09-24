@@ -41,7 +41,7 @@ class MyHomePage extends StatelessWidget {
             ));
           },
           child: const Text(
-            'Login with World ID',
+            'Login',
             style: TextStyle(fontSize: 18),
           ),
         ),
