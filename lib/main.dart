@@ -8,6 +8,8 @@ void main() {
   runApp(const MyApp());
 }
 
+
+
 class MyApp extends StatelessWidget {
   const MyApp({Key? key});
 
@@ -15,13 +17,12 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'TrueEntity',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
+      theme: ThemeData.dark(),
       home: const MyHomePage(),
     );
   }
 }
+
 
 class MyHomePage extends StatelessWidget {
   const MyHomePage();
@@ -48,7 +49,6 @@ class MyHomePage extends StatelessWidget {
     );
   }
 }
-
 class NextPage extends StatefulWidget {
   const NextPage();
 
@@ -64,11 +64,18 @@ class _NextPageState extends State<NextPage> {
   TextEditingController passportController = TextEditingController();
   TextEditingController dobController = TextEditingController();
 
+  // Function to shuffle a string
+  String shuffleString(String input) {
+    List<String> characters = input.split('');
+    characters.shuffle();
+    return characters.join('');
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Next Page'),
+        title: const Text('Home'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -98,7 +105,7 @@ class _NextPageState extends State<NextPage> {
             ElevatedButton(
               onPressed: () async {
                 name = nameController.text;
-                final ssn = ssnController.text;
+                final ssn = shuffleString(ssnController.text); // Shuffle SSN
                 final passport = passportController.text;
                 final dob = dobController.text;
 
@@ -191,8 +198,8 @@ class _DataFetchingPageState extends State<DataFetchingPage> {
           children: [
             Image.network(
               'https://trueentity-api.neeltron.repl.co/static/qrcode.png',
-              width: 100,
-              height: 100,
+              width: 300,
+              height: 300,
             ),
             const SizedBox(height: 16),
             ElevatedButton(
@@ -205,8 +212,10 @@ class _DataFetchingPageState extends State<DataFetchingPage> {
                   );
 
                   if (response.statusCode == 200) {
+                    final Map<String, dynamic> responseData = jsonDecode(response.body);
+                    final String data = responseData['data'];
                     setState(() {
-                      fetchedData = response.body;
+                      fetchedData = data;
                     });
                   } else {
                     print('Request failed with status: ${response.statusCode}');
@@ -222,10 +231,26 @@ class _DataFetchingPageState extends State<DataFetchingPage> {
               'Fetched Data:',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
-            Text(
-              fetchedData,
-              style: const TextStyle(fontSize: 18),
-            ),
+            if (fetchedData.isNotEmpty)
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: fetchedData.split('\n').map((item) {
+                  String label = '';
+                  if (item.startsWith('name')) {
+                    label = 'Name: ';
+                  } else if (item.startsWith('ssn')) {
+                    label = 'SSN: ';
+                  } else if (item.startsWith('passport')) {
+                    label = 'Passport: ';
+                  } else if (item.startsWith('dob')) {
+                    label = 'DOB: ';
+                  }
+                  return Text(
+                    '$label${item.trim()}',
+                    style: const TextStyle(fontSize: 18),
+                  );
+                }).toList(),
+              ),
           ],
         ),
       ),
@@ -259,6 +284,10 @@ class _DataFetchingPageState extends State<DataFetchingPage> {
   }
 }
 
+
+
+
+
 class QRCodeScannerPage extends StatefulWidget {
   const QRCodeScannerPage();
 
@@ -278,11 +307,6 @@ class _QRCodeScannerPageState extends State<QRCodeScannerPage> {
 
   Future<void> _requestCameraPermission() async {
     final status = await Permission.camera.request();
-    if (status.isGranted) {
-      // Initialize QR code scanner here
-    } else {
-      // Handle permission denied
-    }
   }
 
   @override
@@ -314,7 +338,7 @@ class _QRCodeScannerPageState extends State<QRCodeScannerPage> {
                 'Scanned QR Code: ${result!.code}',
                 style: TextStyle(fontSize: 18),
               )
-                  : Text(
+                  : const Text(
                 'Scan a QR code',
                 style: TextStyle(fontSize: 18),
               ),
