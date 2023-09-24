@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:qr_code_scanner/qr_code_scanner.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 void main() {
   runApp(const MyApp());
@@ -144,12 +146,20 @@ class _NextPageState extends State<NextPage> {
             icon: Icon(Icons.car_crash),
             label: 'Fetch Data',
           ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.qr_code_scanner),
+            label: 'Scan QR Code',
+          ),
         ],
         currentIndex: 0,
         onTap: (int index) {
           if (index == 1) {
             Navigator.of(context).push(MaterialPageRoute(
               builder: (context) => const DataFetchingPage(),
+            ));
+          } else if (index == 2) {
+            Navigator.of(context).push(MaterialPageRoute(
+              builder: (context) => const QRCodeScannerPage(),
             ));
           }
         },
@@ -181,8 +191,8 @@ class _DataFetchingPageState extends State<DataFetchingPage> {
           children: [
             Image.network(
               'https://trueentity-api.neeltron.repl.co/static/qrcode.png',
-              width: 100, // Set the desired width
-              height: 100, // Set the desired height
+              width: 100,
+              height: 100,
             ),
             const SizedBox(height: 16),
             ElevatedButton(
@@ -229,14 +239,120 @@ class _DataFetchingPageState extends State<DataFetchingPage> {
             icon: Icon(Icons.car_crash),
             label: 'Fetch Data',
           ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.qr_code_scanner),
+            label: 'Scan QR Code',
+          ),
         ],
         currentIndex: 1,
         onTap: (int index) {
           if (index == 0) {
             Navigator.of(context).pop();
+          } else if (index == 2) {
+            Navigator.of(context).push(MaterialPageRoute(
+              builder: (context) => const QRCodeScannerPage(),
+            ));
           }
         },
       ),
     );
+  }
+}
+
+class QRCodeScannerPage extends StatefulWidget {
+  const QRCodeScannerPage();
+
+  @override
+  _QRCodeScannerPageState createState() => _QRCodeScannerPageState();
+}
+
+class _QRCodeScannerPageState extends State<QRCodeScannerPage> {
+  final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
+  Barcode? result;
+
+  @override
+  void initState() {
+    super.initState();
+    _requestCameraPermission();
+  }
+
+  Future<void> _requestCameraPermission() async {
+    final status = await Permission.camera.request();
+    if (status.isGranted) {
+      // Initialize QR code scanner here
+    } else {
+      // Handle permission denied
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Scan QR Code'),
+      ),
+      body: Column(
+        children: <Widget>[
+          Expanded(
+            flex: 4,
+            child: QRView(
+              key: qrKey,
+              onQRViewCreated: (QRViewController controller) {
+                controller.scannedDataStream.listen((scanData) {
+                  setState(() {
+                    result = scanData;
+                  });
+                });
+              },
+            ),
+          ),
+          Expanded(
+            flex: 1,
+            child: Center(
+              child: result != null
+                  ? Text(
+                'Scanned QR Code: ${result!.code}',
+                style: TextStyle(fontSize: 18),
+              )
+                  : Text(
+                'Scan a QR code',
+                style: TextStyle(fontSize: 18),
+              ),
+            ),
+          ),
+        ],
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        items: const <BottomNavigationBarItem>[
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: 'Home',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.car_crash),
+            label: 'Fetch Data',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.qr_code_scanner),
+            label: 'Scan QR Code',
+          ),
+        ],
+        currentIndex: 2,
+        onTap: (int index) {
+          if (index == 0) {
+            Navigator.of(context).pop();
+          } else if (index == 1) {
+            Navigator.of(context).push(MaterialPageRoute(
+              builder: (context) => const DataFetchingPage(),
+            ));
+          }
+        },
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
   }
 }
